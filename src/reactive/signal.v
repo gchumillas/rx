@@ -16,9 +16,8 @@ pub fn Signal.new[T](value T) Signal[T] {
 
 // Retrieves the current value of the signal
 pub fn (mut s Signal[T]) get() T {
-	// If there's an active effect, add it to the subscribers
-	if active_effect != none {
-		s.subscribers << active_effect
+	if effect := current_effect() {
+		s.subscribers << effect
 	}
 	return s.value
 }

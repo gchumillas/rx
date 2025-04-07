@@ -4,7 +4,11 @@ fn main() {
 	mut count := Signal.new(0)
 
 	create_effect(fn [mut count] () {
-		println('Count is: ${count.get()}')
+		println('Effect 1: Count is: ${count.get()}')
+	})
+
+	create_effect(fn [mut count] () {
+		println('Effect 2: Count is: ${count.get()}')
 	})
 
 	count.set(1) // Esto desencadenará el efecto y mostrará "Count is: 1"
