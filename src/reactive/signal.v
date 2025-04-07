@@ -51,7 +51,7 @@ pub fn (s Signal[T]) get() T {
 
 // Updates the signal's value and notifies all subscribers about the change.
 // This method supports being called on an immutable signal, enhancing flexibility in reactive programming.
-pub fn (s Signal[T]) set(value T) {
+pub fn (mut s Signal[T]) set(value T) {
 	unsafe {
 		// Updates the value of the signal.
 		s.state.value = value

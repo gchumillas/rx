@@ -1,7 +1,7 @@
 Module {
 	name: 'solidv'
-	description: ''
-	version: '0.1.0'
+	description: 'Solid-like reactivity in V'
+	version: '0.0.1'
 	license: 'MIT'
 	dependencies: []
 }
