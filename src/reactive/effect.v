@@ -1,34 +1,45 @@
 module reactive
 
-// Global variable to keep track of the currently running effect
 __global (
-	effect_stack []fn ()
+	effect_stack   []&Effect
+	next_effect_id int
 )
 
-// Pushes a new effect onto the stack and sets it as active
-fn push_effect(f fn ()) {
-	effect_stack << f
+// Represents a reactive effect with its dependencies.
+struct Effect {
+	id  int
+	run fn () @[required]
+mut:
+	subscriptions []ISubscribable
 }
 
-// Removes the top effect from the stack
-fn pop_effect() {
-	if effect_stack.len > 0 {
-		effect_stack.delete_last()
-	}
-}
-
-// Gets the current active effect (top of the stack)
-fn current_effect() ?fn () {
-	if effect_stack.len > 0 {
-		return effect_stack.last()
-	}
-
-	return none
-}
-
-// Creates an effect that runs the provided function reactively
+// Creates a reactive effect and tracks dependencies.
 pub fn create_effect(f fn ()) {
-	push_effect(f)
+	id := next_effect_id
+	next_effect_id++
+
+	mut effect := Effect{
+		id:            id
+		run:           f
+		subscriptions: []
+	}
+
+	// Push the effect onto the stack
+	effect_stack << &effect
+
+	// Clean up old subscriptions
+	for sub in effect.subscriptions {
+		sub.remove_subscriber(id)
+	}
+	effect.subscriptions.clear()
+
+	// Run the effect to register dependencies
 	f()
-	pop_effect()
+
+	// Pop the effect from the stack
+	effect_stack.delete(effect_stack.len - 1)
+}
+
+fn init() {
+	next_effect_id = 1
 }
