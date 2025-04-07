@@ -1,14 +1,12 @@
-import reactive { create_signal }
+import reactive { Signal, create_effect }
 
 fn main() {
-	mut count := create_signal(0)
+	mut count := Signal.new(0)
 
-	// Manual simulation of an effect
-	count.subscribe(fn () {
-		println('Count is now updated')
+	create_effect(fn [mut count] () {
+		println('Count is: ${count.get()}')
 	})
 
-	println('Initial value: ${count.get()}')
-	count.set(1)
-	count.set(2)
+	count.set(1) // Esto desencadenará el efecto y mostrará "Count is: 1"
+	count.set(2) // Esto desencadenará el efecto y mostrará "Count is: 2"
 }
