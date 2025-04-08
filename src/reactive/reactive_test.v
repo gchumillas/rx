@@ -113,3 +113,47 @@ fn test_component_like_isolation() {
 	assert counter1.get() == 1
 	assert counter2.get() == 101
 }
+
+fn test_untrack_prevents_dependency_tracking() {
+	mut count := Signal.new(1)
+	mut triggered := Ref.new(false)
+
+	create_effect(fn [count, mut triggered]() {
+		// Call `get` inside untrack: should NOT register a dependency
+		_ := untrack(fn [count] () int {
+			return count.get()
+		})
+		triggered.value = true
+	})
+
+	triggered.value = false
+	count.set(2)
+
+	// Since count.get() was untracked, changing count should not rerun the effect
+	assert !triggered.value
+}
+
+fn test_get_outside_untrack_still_tracks() {
+	mut count := Signal.new(1)
+	mut triggered := Ref.new(false)
+
+	create_effect(fn [count, mut triggered]() {
+		// This should register a dependency
+		_ = count.get()
+		triggered.value = true
+	})
+
+	triggered.value = false
+	count.set(2)
+
+	// Since count.get() was not untracked, effect should rerun
+	assert triggered.value
+}
+
+fn test_untrack_returns_value() {
+	mut count := Signal.new(42)
+	result := untrack(fn [count] () int {
+		return count.get()
+	})
+	assert result == 42
+}

@@ -40,6 +40,23 @@ pub fn create_effect(f fn ()) {
 	effect_stack.delete(effect_stack.len - 1)
 }
 
+// Run a function without tracking dependencies
+pub fn untrack[T](fn_to_run fn () T) T {
+	// Save the current effect stack
+	old_stack := effect_stack.clone()
+	
+	// Clear the effect stack temporarily
+	effect_stack.clear()
+	
+	// Run the function without tracking dependencies
+	result := fn_to_run()
+	
+	// Restore the effect stack
+	effect_stack = old_stack.clone()
+	
+	return result
+}
+
 fn init() {
 	next_effect_id = 1
 }
