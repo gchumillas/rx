@@ -1,5 +1,4 @@
 module reactive
-import arrays
 
 fn test_signal_get_set() {
 	mut count := Signal.new(0)
@@ -11,51 +10,44 @@ fn test_signal_get_set() {
 
 fn test_effect_reacts_to_changes() {
 	mut count := Signal.new(1)
-	mut log := &[]int{}
+	mut log := Ref.new([]int{})
 
 	create_effect(fn [mut log, count] () {
-		x := count.get()
-		log << x
+		log.value << count.get()
 	})
 
 	count.set(2)
 	count.set(3)
 
-	assert log == [1, 2, 3]
+	assert log.value == [1, 2, 3]
 }
 
 fn test_effect_runs_once_per_change() {
 	mut count := Signal.new(0)
-	mut calls := 0
+	mut calls := Ref.new(0)
 
-	calls_ref := &calls
-	create_effect(fn [calls_ref, count] () {
+	create_effect(fn [mut calls, count] () {
 		_ := count.get()
-		unsafe {
-			*calls_ref += 1
-		}
+		calls.value += 1
 	})
 
 	count.set(1)
 	count.set(2)
 
-	assert calls == 3 // initial run + 2 updates
+	assert calls.value == 3 // initial run + 2 updates
 }
 
 // Test that nested effects run correctly and update independently.
 fn test_effect_unsubscribes_on_rerun() {
 	mut a := Signal.new(0)
 	mut b := Signal.new(0)
-	mut chosen := 0
-	chosen_ref := &chosen
+	mut chosen := Ref.new(0)
 
-	create_effect(fn [chosen_ref, a, b] () {
-		unsafe {
-			if a.get() > 0 {
-				*chosen_ref = b.get()
-			} else {
-				*chosen_ref = a.get()
-			}
+	create_effect(fn [mut chosen, a, b] () {
+		if a.get() > 0 {
+			chosen.value = b.get()
+		} else {
+			chosen.value = a.get()
 		}
 	})
 
@@ -64,51 +56,42 @@ fn test_effect_unsubscribes_on_rerun() {
 
 	// After switching to tracking b, updates to a should not affect chosen
 	a.set(100)
-	assert chosen == 42
+	assert chosen.value == 42
 }
 
 fn test_nested_effects() {
 	mut a := Signal.new(1)
 	mut b := Signal.new(2)
-	mut outer := 0
-	mut inner := 0
+	mut outer := Ref.new(0)
+	mut inner := Ref.new(0)
 
-	outer_ref := &outer
-	inner_ref := &inner
-	create_effect(fn [a, b, outer_ref, inner_ref] () {
-		unsafe {
-			*outer_ref = a.get()
-		}
-		create_effect(fn [b, inner_ref] () {
-			unsafe {
-				*inner_ref = b.get()
-			}
+	create_effect(fn [a, b, mut outer, mut inner] () {
+		outer.value = a.get()
+		create_effect(fn [b, mut inner] () {
+			inner.value = b.get()
 		})
 	})
 
 	a.set(10)
 	b.set(20)
 
-	assert outer == 10
-	assert inner == 20
+	assert outer.value == 10
+	assert inner.value == 20
 }
 // Check that an effect that depends on multiple signals is re-executed if any of them changes.
 fn test_multiple_signals_in_effect() {
 	mut a := Signal.new(1)
 	mut b := Signal.new(2)
-	mut total := 0
+	mut total := Ref.new(0)
 
-	total_ref := &total
-	create_effect(fn [a, b, total_ref] () {
-		unsafe {
-			*total_ref = a.get() + b.get()
-		}
+	create_effect(fn [a, b, mut total] () {
+		total.value = a.get() + b.get()
 	})
 
 	a.set(3)
 	b.set(4)
 
-	assert total == 7
+	assert total.value == 7
 }
 
 fn counter_component(start int) Signal[int] {
