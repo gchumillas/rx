@@ -12,7 +12,7 @@ fn test_effect_reacts_to_changes() {
 	mut count := Signal.new(1)
 	mut log := Ref.new([]int{})
 
-	create_effect(fn [mut log, count] () {
+	create_effect(fn [mut log, mut count] () {
 		log.value << count.get()
 	})
 
@@ -26,7 +26,7 @@ fn test_effect_runs_once_per_change() {
 	mut count := Signal.new(0)
 	mut calls := Ref.new(0)
 
-	create_effect(fn [mut calls, count] () {
+	create_effect(fn [mut calls, mut count] () {
 		_ := count.get()
 		calls.value += 1
 	})
@@ -43,7 +43,7 @@ fn test_effect_unsubscribes_on_rerun() {
 	mut b := Signal.new(0)
 	mut chosen := Ref.new(0)
 
-	create_effect(fn [mut chosen, a, b] () {
+	create_effect(fn [mut chosen, mut a, mut b] () {
 		if a.get() > 0 {
 			chosen.value = b.get()
 		} else {
@@ -65,9 +65,9 @@ fn test_nested_effects() {
 	mut outer := Ref.new(0)
 	mut inner := Ref.new(0)
 
-	create_effect(fn [a, b, mut outer, mut inner] () {
+	create_effect(fn [mut a, mut b, mut outer, mut inner] () {
 		outer.value = a.get()
-		create_effect(fn [b, mut inner] () {
+		create_effect(fn [mut b, mut inner] () {
 			inner.value = b.get()
 		})
 	})
@@ -78,13 +78,14 @@ fn test_nested_effects() {
 	assert outer.value == 10
 	assert inner.value == 20
 }
+
 // Check that an effect that depends on multiple signals is re-executed if any of them changes.
 fn test_multiple_signals_in_effect() {
 	mut a := Signal.new(1)
 	mut b := Signal.new(2)
 	mut total := Ref.new(0)
 
-	create_effect(fn [a, b, mut total] () {
+	create_effect(fn [mut a, mut b, mut total] () {
 		total.value = a.get() + b.get()
 	})
 
@@ -94,9 +95,9 @@ fn test_multiple_signals_in_effect() {
 	assert total.value == 7
 }
 
-fn counter_component(start int) Signal[int] {
-	count := Signal.new(start)
-	create_effect(fn [count] () {
+fn counter_component(start int) &Signal[int] {
+	mut count := Signal.new(start)
+	create_effect(fn [mut count] () {
 		count.get() // simulate rendering
 	})
 	return count
@@ -118,9 +119,9 @@ fn test_untrack_prevents_dependency_tracking() {
 	mut count := Signal.new(1)
 	mut triggered := Ref.new(false)
 
-	create_effect(fn [count, mut triggered]() {
+	create_effect(fn [mut count, mut triggered]() {
 		// Call `get` inside untrack: should NOT register a dependency
-		_ := untrack(fn [count] () int {
+		_ := untrack(fn [mut count] () int {
 			return count.get()
 		})
 		triggered.value = true
@@ -137,7 +138,7 @@ fn test_get_outside_untrack_still_tracks() {
 	mut count := Signal.new(1)
 	mut triggered := Ref.new(false)
 
-	create_effect(fn [count, mut triggered]() {
+	create_effect(fn [mut count, mut triggered]() {
 		// This should register a dependency
 		_ = count.get()
 		triggered.value = true
@@ -152,7 +153,7 @@ fn test_get_outside_untrack_still_tracks() {
 
 fn test_untrack_returns_value() {
 	mut count := Signal.new(42)
-	result := untrack(fn [count] () int {
+	result := untrack(fn [mut count] () int {
 		return count.get()
 	})
 	assert result == 42

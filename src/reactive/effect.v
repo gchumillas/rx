@@ -28,7 +28,7 @@ pub fn create_effect(f fn ()) {
 	effect_stack << &effect
 
 	// Clean up old subscriptions
-	for sub in effect.subscriptions {
+	for mut sub in effect.subscriptions {
 		sub.remove_subscriber(id)
 	}
 	effect.subscriptions.clear()
