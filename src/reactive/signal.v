@@ -26,10 +26,10 @@ pub fn Signal.new[T](value T) &Signal[T] {
 
 // Retrieves the current value of the signal and registers any active effect as a subscriber.
 // This method can be called on an immutable signal, allowing for broader usage in reactive contexts.
-pub fn (mut s Signal[T]) get() T {
+pub fn (s &Signal[T]) get() T {
 	if effect_stack.len > 0 {
 		mut current := effect_stack[effect_stack.len - 1]
-		s.subscribers[current.id] = current.run
+		unsafe { s.subscribers[current.id] = current.run }
 		current.subscriptions << s
 	}
 	return s.value
