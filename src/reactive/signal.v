@@ -8,6 +8,14 @@ mut:
 	subscribers map[int]fn ()
 }
 
+pub fn (ctx &Context) signal[T](value T) &Signal[T] {
+	return &Signal[T]{
+		ctx:         ctx
+		value:       value
+		subscribers: map[int]fn (){}
+	}
+}
+
 // Retrieves the current value of the signal and registers any active effect as a subscriber.
 // This method can be called on an immutable signal, allowing for broader usage in reactive contexts.
 pub fn (s &Signal[T]) get() T {

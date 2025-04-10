@@ -7,7 +7,6 @@ struct Effect {
 }
 
 // Creates a reactive effect and tracks dependencies.
-// TODO: Clean up old subscriptions (if possible)
 pub fn (mut ctx Context) create_effect(f fn ()) {
 	id := ctx.next_effect_id
 	ctx.next_effect_id++
@@ -20,6 +19,7 @@ pub fn (mut ctx Context) create_effect(f fn ()) {
 	// Push the effect onto the stack
 	ctx.effect_stack << &effect
 
+	// TODO: Clean up old subscriptions (if possible)
 	// Run the effect to register dependencies
 	f()
 

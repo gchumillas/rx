@@ -3,8 +3,8 @@ module main
 import reactive
 
 fn main() {
-	mut ctx := reactive.new_context()
-	mut count := ctx.new_signal(0)
+	mut ctx := reactive.context()
+	mut count := ctx.signal(0)
 	mut tracked_updates := 0
 	mut untracked_updates := 0
 
