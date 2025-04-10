@@ -11,25 +11,20 @@ mut:
 
 // Defines a reactive signal that holds a value and manages a list of subscribers.
 pub struct Signal[T] {
+	ctx &Context
 mut:
 	value       T
 	subscribers map[int]fn ()
 }
 
-// Constructor for creating a new Signal with an initial value.
-pub fn Signal.new[T](value T) &Signal[T] {
-	return &Signal[T]{
-		value: value
-		subscribers: map[int]fn (){}
-	}
-}
-
 // Retrieves the current value of the signal and registers any active effect as a subscriber.
 // This method can be called on an immutable signal, allowing for broader usage in reactive contexts.
 pub fn (s &Signal[T]) get() T {
-	if effect_stack.len > 0 {
-		mut current := effect_stack[effect_stack.len - 1]
-		unsafe { s.subscribers[current.id] = current.run }
+	if s.ctx.effect_stack.len > 0 {
+		mut current := s.ctx.effect_stack[s.ctx.effect_stack.len - 1]
+		unsafe {
+			s.subscribers[current.id] = current.run
+		}
 		current.subscriptions << s
 	}
 	return s.value

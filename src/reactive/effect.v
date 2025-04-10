@@ -1,10 +1,5 @@
 module reactive
 
-__global (
-	effect_stack   []&Effect
-	next_effect_id int
-)
-
 // Represents a reactive effect with its dependencies.
 struct Effect {
 	id  int
@@ -14,9 +9,9 @@ mut:
 }
 
 // Creates a reactive effect and tracks dependencies.
-pub fn create_effect(f fn ()) {
-	id := next_effect_id
-	next_effect_id++
+pub fn (mut ctx Context) create_effect(f fn ()) {
+	id := ctx.next_effect_id
+	ctx.next_effect_id++
 
 	mut effect := Effect{
 		id:            id
@@ -25,10 +20,11 @@ pub fn create_effect(f fn ()) {
 	}
 
 	// Push the effect onto the stack
-	effect_stack << &effect
+	ctx.effect_stack << &effect
 
 	// Clean up old subscriptions
 	for mut sub in effect.subscriptions {
+		// TODO: does this ever run?
 		sub.remove_subscriber(id)
 	}
 	effect.subscriptions.clear()
@@ -37,26 +33,23 @@ pub fn create_effect(f fn ()) {
 	f()
 
 	// Pop the effect from the stack
-	effect_stack.delete(effect_stack.len - 1)
+	ctx.effect_stack.delete(ctx.effect_stack.len - 1)
 }
 
 // Run a function without tracking dependencies
-pub fn untrack[T](fn_to_run fn () T) T {
+pub fn (mut ctx Context) untrack[T](fn_to_run fn () T) T {
 	// Save the current effect stack
-	old_stack := effect_stack.clone()
+	old_stack := ctx.effect_stack.clone()
 	
 	// Clear the effect stack temporarily
-	effect_stack.clear()
+	ctx.effect_stack.clear()
 	
 	// Run the function without tracking dependencies
 	result := fn_to_run()
 	
 	// Restore the effect stack
-	effect_stack = old_stack.clone()
+	ctx.effect_stack = old_stack.clone()
 	
 	return result
 }
 
-fn init() {
-	next_effect_id = 1
-}

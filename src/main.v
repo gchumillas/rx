@@ -3,21 +3,22 @@ module main
 import reactive
 
 fn main() {
-	mut count := reactive.Signal.new(0)
+	mut ctx := reactive.new_context()
+	mut count := ctx.new_signal(0)
 	mut tracked_updates := 0
 	mut untracked_updates := 0
 
 	// Effect that tracks the signal
-	reactive.create_effect(fn [mut count, mut tracked_updates] () {
+	ctx.create_effect(fn [mut count, mut tracked_updates] () {
 		println('Tracked effect: Count is: ${count.get()}')
 		tracked_updates++
 		println('  Tracked updates: ${tracked_updates}')
 	})
 
 	// Effect that uses untrack to prevent dependency tracking
-	reactive.create_effect(fn [mut count, mut untracked_updates] () {
+	ctx.create_effect(fn [mut ctx, mut count, mut untracked_updates] () {
 		println('Untracked effect: Using untrack to read count')
-		reactive.untrack(fn [mut count] () int {
+		ctx.untrack(fn [mut count] () int {
 			println('  Untracked count is: ${count.get()}')
 			return count.get()
 		})
@@ -32,7 +33,7 @@ fn main() {
 	count.set(2) // This will trigger only the tracked effect
 	
 	println('\nDemonstration of untrack with return value:')
-	result := reactive.untrack(fn [mut count] () int {
+	result := ctx.untrack(fn [mut count] () int {
 		value := count.get()
 		println('  Reading count (${value}) without tracking')
 		return value * 10
