@@ -16,31 +16,19 @@ pub fn (mut ctx Context) create_effect(f fn ()) {
 		run:           f
 	}
 
-	// Push the effect onto the stack
 	ctx.effect_stack << &effect
 
 	// TODO: Clean up old subscriptions (if possible)
-	// Run the effect to register dependencies
 	f()
 
-	// Pop the effect from the stack
 	ctx.effect_stack.delete(ctx.effect_stack.len - 1)
 }
 
 // Run a function without tracking dependencies
 pub fn (mut ctx Context) untrack[T](fn_to_run fn () T) T {
-	// Save the current effect stack
 	old_stack := ctx.effect_stack.clone()
-	
-	// Clear the effect stack temporarily
 	ctx.effect_stack.clear()
-	
-	// Run the function without tracking dependencies
 	result := fn_to_run()
-	
-	// Restore the effect stack
 	ctx.effect_stack = old_stack.clone()
-	
 	return result
 }
-

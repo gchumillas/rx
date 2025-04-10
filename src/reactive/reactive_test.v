@@ -1,5 +1,6 @@
 module reactive
 
+// Tests the basic functionality of signal creation, getting, and setting values.
 fn test_signal_get_set() {
 	ctx := context()
 	mut count := ctx.signal(0)
@@ -9,6 +10,7 @@ fn test_signal_get_set() {
 	assert count.get() == 42
 }
 
+// Tests that effects properly react to signal changes by executing when dependencies change.
 fn test_effect_reacts_to_changes() {
 	mut ctx := context()
 	mut count := ctx.signal(1)
@@ -24,6 +26,7 @@ fn test_effect_reacts_to_changes() {
 	assert log.value == [1, 2, 3]
 }
 
+// Verifies that effects run exactly once per signal change, plus the initial execution.
 fn test_effect_runs_once_per_change() {
 	mut ctx := context()
 	mut count := ctx.signal(0)
@@ -63,6 +66,7 @@ fn test_effect_unsubscribes_on_rerun() {
 	assert chosen.value == 42
 }
 
+// Tests that effects can be nested within other effects and update correctly.
 fn test_nested_effects() {
 	mut ctx := context()
 	mut a := ctx.signal(1)
@@ -101,6 +105,8 @@ fn test_multiple_signals_in_effect() {
 	assert total.value == 7
 }
 
+// Helper function that simulates a component with its own internal state.
+// Creates a signal with the given start value and an effect that tracks it.
 fn counter_component(mut ctx Context, start int) &Signal[int] {
 	count := ctx.signal(start)
 	ctx.create_effect(fn [count] () {
@@ -122,9 +128,10 @@ fn test_component_like_isolation() {
 	assert counter2.get() == 101
 }
 
+// Tests that using untrack prevents dependency tracking for signal access within the untracked function.
 fn test_untrack_prevents_dependency_tracking() {
 	mut ctx := context()
-	mut count := ctx.signal(1) // pub fn context = contex
+	mut count := ctx.signal(1)
 	mut triggered := ref(false)
 
 	ctx.create_effect(fn [mut ctx, count, mut triggered]() {
@@ -142,6 +149,7 @@ fn test_untrack_prevents_dependency_tracking() {
 	assert !triggered.value
 }
 
+// Tests that signal access outside of untrack still registers dependencies as expected.
 fn test_get_outside_untrack_still_tracks() {
 	mut ctx := context()
 	mut count := ctx.signal(1)
@@ -160,6 +168,7 @@ fn test_get_outside_untrack_still_tracks() {
 	assert triggered.value
 }
 
+// Tests that the untrack function correctly returns the value from the untracked function.
 fn test_untrack_returns_value() {
 	mut ctx := context()
 	count := ctx.signal(42)

@@ -2,6 +2,8 @@ module main
 
 import reactive
 
+// Demonstrates the reactive system's capabilities with signals, effects, and untracking.
+// This example shows how tracked and untracked dependencies behave differently when signals change.
 fn main() {
 	mut ctx := reactive.context()
 	mut count := ctx.signal(0)

@@ -8,6 +8,8 @@ mut:
 	subscribers map[int]fn ()
 }
 
+// Creates a new signal with the given initial value.
+// A signal is a reactive value that can be observed and updated.
 pub fn (ctx &Context) signal[T](value T) &Signal[T] {
 	return &Signal[T]{
 		ctx:         ctx
