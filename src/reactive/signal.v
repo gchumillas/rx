@@ -38,9 +38,3 @@ pub fn (mut s Signal[T]) set(value T) {
 		sub()
 	}
 }
-
-// Removes a subscriber from the signal by their identifier.
-// This method supports being called on an immutable signal, ensuring that subscriber management can be handled flexibly.
-pub fn (mut s Signal[T]) remove_subscriber(effect_id int) {
-	s.subscribers.delete(effect_id)
-}

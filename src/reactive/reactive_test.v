@@ -12,7 +12,7 @@ fn test_signal_get_set() {
 
 // Tests that effects properly react to signal changes by executing when dependencies change.
 fn test_effect_reacts_to_changes() {
-	mut ctx := context()
+	ctx := context()
 	mut count := ctx.signal(1)
 	mut log := ref([]int{})
 
@@ -28,7 +28,7 @@ fn test_effect_reacts_to_changes() {
 
 // Verifies that effects run exactly once per signal change, plus the initial execution.
 fn test_effect_runs_once_per_change() {
-	mut ctx := context()
+	ctx := context()
 	mut count := ctx.signal(0)
 	mut calls := ref(0)
 
@@ -45,7 +45,7 @@ fn test_effect_runs_once_per_change() {
 
 // Test that nested effects run correctly and update independently.
 fn test_effect_unsubscribes_on_rerun() {
-	mut ctx := context()
+	ctx := context()
 	mut a := ctx.signal(0)
 	mut b := ctx.signal(0)
 	mut chosen := ref(0)
@@ -68,13 +68,13 @@ fn test_effect_unsubscribes_on_rerun() {
 
 // Tests that effects can be nested within other effects and update correctly.
 fn test_nested_effects() {
-	mut ctx := context()
+	ctx := context()
 	mut a := ctx.signal(1)
 	mut b := ctx.signal(2)
 	mut outer := ref(0)
 	mut inner := ref(0)
 
-	ctx.create_effect(fn [a, b, mut ctx, mut outer, mut inner] () {
+	ctx.create_effect(fn [a, b, ctx, mut outer, mut inner] () {
 		outer.value = a.get()
 		ctx.create_effect(fn [b, mut inner] () {
 			inner.value = b.get()
@@ -90,7 +90,7 @@ fn test_nested_effects() {
 
 // Check that an effect that depends on multiple signals is re-executed if any of them changes.
 fn test_multiple_signals_in_effect() {
-	mut ctx := context()
+	ctx := context()
 	mut a := ctx.signal(1)
 	mut b := ctx.signal(2)
 	mut total := ref(0)
@@ -107,7 +107,7 @@ fn test_multiple_signals_in_effect() {
 
 // Helper function that simulates a component with its own internal state.
 // Creates a signal with the given start value and an effect that tracks it.
-fn counter_component(mut ctx Context, start int) &Signal[int] {
+fn counter_component(ctx Context, start int) &Signal[int] {
 	count := ctx.signal(start)
 	ctx.create_effect(fn [count] () {
 		count.get() // simulate rendering
@@ -117,9 +117,9 @@ fn counter_component(mut ctx Context, start int) &Signal[int] {
 
 // Simulates a "component" that uses its own state, without interfering with another.
 fn test_component_like_isolation() {
-	mut ctx := context()
-	mut counter1 := counter_component(mut ctx, 0)
-	mut counter2 := counter_component(mut ctx, 100)
+	ctx := context()
+	mut counter1 := counter_component(ctx, 0)
+	mut counter2 := counter_component(ctx, 100)
 
 	counter1.set(1)
 	counter2.set(101)
@@ -130,11 +130,11 @@ fn test_component_like_isolation() {
 
 // Tests that using untrack prevents dependency tracking for signal access within the untracked function.
 fn test_untrack_prevents_dependency_tracking() {
-	mut ctx := context()
+	ctx := context()
 	mut count := ctx.signal(1)
 	mut triggered := ref(false)
 
-	ctx.create_effect(fn [mut ctx, count, mut triggered]() {
+	ctx.create_effect(fn [ctx, count, mut triggered]() {
 		// Call `get` inside untrack: should NOT register a dependency
 		_ := ctx.untrack(fn [count] () int {
 			return count.get()
@@ -151,7 +151,7 @@ fn test_untrack_prevents_dependency_tracking() {
 
 // Tests that signal access outside of untrack still registers dependencies as expected.
 fn test_get_outside_untrack_still_tracks() {
-	mut ctx := context()
+	ctx := context()
 	mut count := ctx.signal(1)
 	mut triggered := ref(false)
 
@@ -170,7 +170,7 @@ fn test_get_outside_untrack_still_tracks() {
 
 // Tests that the untrack function correctly returns the value from the untracked function.
 fn test_untrack_returns_value() {
-	mut ctx := context()
+	ctx := context()
 	count := ctx.signal(42)
 	result := ctx.untrack(fn [count] () int {
 		return count.get()
