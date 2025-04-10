@@ -1,14 +1,5 @@
 module reactive
 
-// Interface defining methods for objects that can be subscribed to.
-// This allows for a uniform way of managing subscribers across different types.
-interface ISubscribable {
-mut:
-	// Removes a subscriber by their unique identifier.
-	// This method is crucial for maintaining a clean list of active subscribers.
-	remove_subscriber(effect_id int)
-}
-
 // Defines a reactive signal that holds a value and manages a list of subscribers.
 pub struct Signal[T] {
 	ctx &Context
@@ -25,7 +16,6 @@ pub fn (s &Signal[T]) get() T {
 		unsafe {
 			s.subscribers[current.id] = current.run
 		}
-		current.subscriptions << s
 	}
 	return s.value
 }

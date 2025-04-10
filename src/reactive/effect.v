@@ -4,11 +4,10 @@ module reactive
 struct Effect {
 	id  int
 	run fn () @[required]
-mut:
-	subscriptions []ISubscribable
 }
 
 // Creates a reactive effect and tracks dependencies.
+// TODO: Clean up old subscriptions (if possible)
 pub fn (mut ctx Context) create_effect(f fn ()) {
 	id := ctx.next_effect_id
 	ctx.next_effect_id++
@@ -16,18 +15,10 @@ pub fn (mut ctx Context) create_effect(f fn ()) {
 	mut effect := Effect{
 		id:            id
 		run:           f
-		subscriptions: []
 	}
 
 	// Push the effect onto the stack
 	ctx.effect_stack << &effect
-
-	// Clean up old subscriptions
-	for mut sub in effect.subscriptions {
-		// TODO: does this ever run?
-		sub.remove_subscriber(id)
-	}
-	effect.subscriptions.clear()
 
 	// Run the effect to register dependencies
 	f()
