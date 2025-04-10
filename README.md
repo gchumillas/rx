@@ -151,7 +151,7 @@ SolidV is designed to be highly performant. Benchmarks show:
 You can run the benchmarks with:
 
 ```
-v -enable-globals test src/reactive/reactive_benchmark_test.v
+v -enable-globals -stats test src/reactive/reactive_benchmark_test.v
 ```
 
 ## Roadmap
