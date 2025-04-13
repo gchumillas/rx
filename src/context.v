@@ -3,7 +3,7 @@ module rx
 // Represents the reactive system's context, managing effects and their dependencies.
 // The @[heap] attribute ensures the context is allocated on the heap for proper reference handling.
 @[heap]
-struct Context {
+pub struct Context {
 mut:
 	effect_stack   []&Effect
 	next_effect_id int
