@@ -13,8 +13,8 @@ pub fn (ctx &Context) create_effect(f fn ()) {
 		ctx.next_effect_id++
 
 		mut effect := Effect{
-			id:            id
-			run:           f
+			id:  id
+			run: f
 		}
 
 		ctx.effect_stack << &effect
@@ -22,7 +22,7 @@ pub fn (ctx &Context) create_effect(f fn ()) {
 		// TODO: Clean up old subscriptions (if possible)
 		f()
 
-		ctx.effect_stack.delete(ctx.effect_stack.len - 1)	
+		ctx.effect_stack.delete(ctx.effect_stack.len - 1)
 	}
 }
 

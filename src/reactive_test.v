@@ -134,7 +134,7 @@ fn test_untrack_prevents_dependency_tracking() {
 	mut count := ctx.signal(1)
 	mut triggered := ref(false)
 
-	ctx.create_effect(fn [ctx, count, mut triggered]() {
+	ctx.create_effect(fn [ctx, count, mut triggered] () {
 		// Call `get` inside untrack: should NOT register a dependency
 		_ := ctx.untrack(fn [count] () int {
 			return count.get()
@@ -155,7 +155,7 @@ fn test_get_outside_untrack_still_tracks() {
 	mut count := ctx.signal(1)
 	mut triggered := ref(false)
 
-	ctx.create_effect(fn [count, mut triggered]() {
+	ctx.create_effect(fn [count, mut triggered] () {
 		// This should register a dependency
 		_ = count.get()
 		triggered.value = true

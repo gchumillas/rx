@@ -10,5 +10,7 @@ pub mut:
 // Creates a new reference wrapper for the given value.
 // This allows the value to be mutated within closures where direct mutation would not be possible.
 pub fn ref[T](value T) &Ref[T] {
-	return &Ref[T]{ value: value }
+	return &Ref[T]{
+		value: value
+	}
 }

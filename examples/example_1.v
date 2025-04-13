@@ -30,10 +30,10 @@ fn main() {
 
 	println('\nUpdating count to 1...')
 	count.set(1) // This will trigger only the tracked effect
-	
+
 	println('\nUpdating count to 2...')
 	count.set(2) // This will trigger only the tracked effect
-	
+
 	println('\nDemonstration of untrack with return value:')
 	result := ctx.untrack(fn [mut count] () int {
 		value := count.get()
