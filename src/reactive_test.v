@@ -1,4 +1,4 @@
-module reactive
+module rx
 
 // Tests the basic functionality of signal creation, getting, and setting values.
 fn test_signal_get_set() {

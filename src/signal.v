@@ -1,4 +1,4 @@
-module reactive
+module rx
 
 // Defines a reactive signal that holds a value and manages a list of subscribers.
 pub struct Signal[T] {

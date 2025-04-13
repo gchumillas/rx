@@ -1,4 +1,4 @@
-module reactive
+module rx
 
 // A generic reference wrapper that allows for mutable access to values within closures.
 // This is particularly useful in reactive contexts where values need to be modified within effects.

@@ -1,4 +1,4 @@
-module reactive
+module rx
 
 // Represents the reactive system's context, managing effects and their dependencies.
 // The @[heap] attribute ensures the context is allocated on the heap for proper reference handling.

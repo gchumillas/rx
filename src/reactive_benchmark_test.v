@@ -1,4 +1,4 @@
-module reactive
+module rx
 
 import time
 

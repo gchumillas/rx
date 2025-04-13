@@ -1,4 +1,4 @@
-module reactive
+module rx
 
 // Represents a reactive effect with its dependencies.
 struct Effect {

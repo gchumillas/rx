@@ -1,11 +1,11 @@
 module main
 
-import reactive
+import rx
 
 // Demonstrates the reactive system's capabilities with signals, effects, and untracking.
 // This example shows how tracked and untracked dependencies behave differently when signals change.
 fn main() {
-	mut ctx := reactive.context()
+	mut ctx := rx.context()
 	mut count := ctx.signal(0)
 	mut tracked_updates := 0
 	mut untracked_updates := 0
