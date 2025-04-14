@@ -1,25 +1,33 @@
 module main
 
 import rx
-import html
 
-fn main() {
+// A simple counter component
+fn counter_component() &rx.HTMLElement {
 	mut ctx := rx.context()
 	mut count := ctx.signal(0)
-	mut app_elem := html.document.get_element_by_id('app')?
 
-	mut p_elem := html.document.create_element('p')
-	ctx.create_effect(fn [mut p_elem, count] () {
-		val := count.get()
-		p_elem.set_text_content('Count: ${val}')
+	mut span := rx.create_element('span')
+	span.set_inner_text('${count.get()}')
+
+	ctx.create_effect(fn [count, mut span]() {
+		span.set_inner_text('${count.get()}')
 	})
-	app_elem.append_child(p_elem)
 
-	// adds a button
-	mut btn_elem := html.document.create_element('button')
-	btn_elem.set_text_content('Click me!')
-	btn_elem.add_event_listener('click', fn [mut count] () {
+	mut button := rx.create_element('button')
+	button.set_inner_text('Increment')
+	button.add_event_listener('click', fn [mut count]() {
 		count.set(count.get() + 1)
 	})
-	app_elem.append_child(btn_elem)
+
+	mut div := rx.create_element('div')
+	div.append_child(span)
+	div.append_child(button)
+
+	return div
+}
+
+fn main() {
+	mut app := rx.get_element_by_id('app')?
+	app.render(counter_component)
 }
