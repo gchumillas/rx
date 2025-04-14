@@ -34,7 +34,7 @@ pub fn (s &Signal[T]) get() T {
 // This method supports being called on an immutable signal, enhancing flexibility in reactive programming.
 pub fn (mut s Signal[T]) set(value T) {
 	s.value = value
-	for sub in s.subscribers.values() {
+	for _, sub in s.subscribers {
 		sub()
 	}
 }

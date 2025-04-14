@@ -1,22 +1,25 @@
 module main
 
-import js.dom
+import rx
+import html
 
 fn main() {
-	mut div := dom.document.getElementById('app'.str)?
+	mut ctx := rx.context()
+	mut count := ctx.signal(0)
+	mut app_elem := html.document.get_element_by_id('app')?
 
-	// adds a paragraph
-	mut p := dom.document.createElement('p'.str)
-	p.textContent = 'Hi from V!'.str
-	div.appendChild(p)
+	mut p_elem := html.document.create_element('p')
+	ctx.create_effect(fn [mut p_elem, count] () {
+		val := count.get()
+		p_elem.set_text_content('Count: ${val}')
+	})
+	app_elem.append_child(p_elem)
 
 	// adds a button
-	mut btn := dom.document.createElement('button'.str)
-	btn.textContent = 'Click me!'.str
-	div.appendChild(btn)
-
-	// adds an event listener
-	btn.addEventListener('click'.str, fn [mut p] (_ JS.Event) {
-		p.textContent = 'Button clicked!'.str
-	}, JS.EventListenerOptions{})
+	mut btn_elem := html.document.create_element('button')
+	btn_elem.set_text_content('Click me!')
+	btn_elem.add_event_listener('click', fn [mut count] () {
+		count.set(count.get() + 1)
+	})
+	app_elem.append_child(btn_elem)
 }
