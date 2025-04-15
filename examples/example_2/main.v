@@ -3,6 +3,19 @@ module main
 import rx
 import html
 
+// A simple increment button component
+struct IncrementButtonProps {
+	text     string
+	on_click fn () @[required]
+}
+
+fn increment_button(ctx &rx.Context, props IncrementButtonProps) html.Element {
+	mut btn := html.create_element(tag_name: 'button')
+	btn.add_event_listener('click', props.on_click)
+	btn.set_inner_text(props.text)
+	return btn
+}
+
 // A simple counter component
 fn counter_component() html.Element {
 	mut ctx := rx.context()
@@ -17,13 +30,15 @@ fn counter_component() html.Element {
 		span.set_inner_text('${count.get()}')
 	})
 
-	mut button := html.create_element(tag_name: 'button')
-	button.set_inner_text('Increment')
-	button.add_event_listener('click', do_increment)
-
 	return html.create_element(
 		tag_name: 'div'
-		children: [span, button]
+		children: [
+			span,
+			increment_button(ctx, struct {
+				text: 'Increment',
+				on_click: do_increment
+			})
+		]
 	)
 }
 
