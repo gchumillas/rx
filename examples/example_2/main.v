@@ -4,7 +4,7 @@ import rx
 import html
 
 // A simple counter component
-fn counter_component() &html.Element {
+fn counter_component() html.Element {
 	mut ctx := rx.context()
 	mut count := ctx.signal(0)
 
@@ -22,7 +22,7 @@ fn counter_component() &html.Element {
 	})
 
 	return html.create_element(
-		tag_name: 'div',
+		tag_name: 'div'
 		children: [span, button]
 	)
 }
