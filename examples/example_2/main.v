@@ -4,7 +4,7 @@ import rx
 import html
 
 // A simple counter component
-fn counter_component() &html.HTMLElement {
+fn counter_component() &html.Element {
 	mut ctx := rx.context()
 	mut count := ctx.signal(0)
 
