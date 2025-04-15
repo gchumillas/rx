@@ -9,8 +9,6 @@ fn counter_component() html.Element {
 	mut count := ctx.signal(0)
 
 	mut span := html.create_element(tag_name: 'span')
-	span.set_inner_text('${count.get()}')
-
 	ctx.create_effect(fn [count, mut span]() {
 		span.set_inner_text('${count.get()}')
 	})
