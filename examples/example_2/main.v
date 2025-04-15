@@ -3,6 +3,20 @@ module main
 import rx
 import html
 
+// A simple counter span component
+struct CounterSpanProps {
+	count rx.Signal[int]
+}
+
+fn counter_span(ctx &rx.Context, props CounterSpanProps) html.Element {
+	count := props.count
+	mut span := html.create_element(tag_name: 'span')
+	ctx.create_effect(fn [mut span, count]() {
+		span.set_inner_text('${count.get()}')
+	})
+	return span
+}
+
 // A simple increment button component
 struct IncrementButtonProps {
 	text     string
@@ -25,15 +39,12 @@ fn counter_component() html.Element {
 		count.set(count.get() + 1)
 	}
 
-	mut span := html.create_element(tag_name: 'span')
-	ctx.create_effect(fn [count, mut span]() {
-		span.set_inner_text('${count.get()}')
-	})
-
 	return html.create_element(
 		tag_name: 'div'
 		children: [
-			span,
+			counter_span(ctx, struct {
+				count
+			})
 			increment_button(ctx, struct {
 				text: 'Increment',
 				on_click: do_increment
