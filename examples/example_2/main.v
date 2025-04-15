@@ -8,6 +8,10 @@ fn counter_component() html.Element {
 	mut ctx := rx.context()
 	mut count := ctx.signal(0)
 
+	do_increment := fn [mut count]() {
+		count.set(count.get() + 1)
+	}
+
 	mut span := html.create_element(tag_name: 'span')
 	ctx.create_effect(fn [count, mut span]() {
 		span.set_inner_text('${count.get()}')
@@ -15,9 +19,7 @@ fn counter_component() html.Element {
 
 	mut button := html.create_element(tag_name: 'button')
 	button.set_inner_text('Increment')
-	button.add_event_listener('click', fn [mut count]() {
-		count.set(count.get() + 1)
-	})
+	button.add_event_listener('click', do_increment)
 
 	return html.create_element(
 		tag_name: 'div'
