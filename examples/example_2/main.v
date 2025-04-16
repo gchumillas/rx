@@ -12,9 +12,11 @@ fn counter_component() html.Element {
 		count.set(count.get() + 1)
 	}
 
+	// <div>
 	return ctx.create_element(
 		'div',
 		[
+			// <span>{count}</span>
 			ctx.create_element(
 				'span',
 				none,
@@ -22,6 +24,7 @@ fn counter_component() html.Element {
 					target.set_inner_text('${count.get()}')
 				}
 			)
+			// <button onClick={do_increment}>Increment</button>
 			ctx.create_element(
 				'button',
 				none,
