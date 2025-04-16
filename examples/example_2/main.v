@@ -3,31 +3,15 @@ module main
 import rx
 import html
 
-// A simple counter span component
-struct CounterSpanProps {
-	count rx.Signal[int]
-}
-
-fn counter_span(ctx &rx.Context, props CounterSpanProps) html.Element {
-	count := props.count
-	mut span := html.create_element(tag_name: 'span')
-	ctx.create_effect(fn [mut span, count]() {
-		span.set_inner_text('${count.get()}')
-	})
-	return span
-}
-
-// A simple increment button component
-struct IncrementButtonProps {
-	text     string
-	on_click fn () @[required]
-}
-
-fn increment_button(ctx &rx.Context, props IncrementButtonProps) html.Element {
-	mut btn := html.create_element(tag_name: 'button')
-	btn.add_event_listener('click', props.on_click)
-	btn.set_inner_text(props.text)
-	return btn
+fn create_element(
+	tag_name string,
+	children fn (mut target html.Element) []html.Element
+) html.Element {
+	mut target := html.create_element(tag_name: tag_name)
+	for elem in children(mut target) {
+		target.append_child(elem)
+	}
+	return target
 }
 
 // A simple counter component
@@ -39,17 +23,29 @@ fn counter_component() html.Element {
 		count.set(count.get() + 1)
 	}
 
-	return html.create_element(
-		tag_name: 'div'
-		children: [
-			counter_span(ctx, struct {
-				count
-			})
-			increment_button(ctx, struct {
-				text: 'Increment',
-				on_click: do_increment
-			})
-		]
+	return create_element(
+		'div',
+		fn [ctx, count, do_increment] (mut _ html.Element) []html.Element {
+			return [
+				create_element(
+					'span',
+					fn [ctx, count] (mut target html.Element) []html.Element {
+						ctx.create_effect(fn [mut target, count] () {
+							target.set_inner_text('${count.get()}')
+						})
+						return []
+					}
+				)
+				create_element(
+					'button',
+					fn [do_increment] (mut target html.Element) []html.Element {
+						target.add_event_listener('click', do_increment)
+						target.set_inner_text('Increment')
+						return []
+					}
+				)
+			]
+		}
 	)
 }
 
