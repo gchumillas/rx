@@ -1,5 +1,6 @@
 module rx
 
+import html
 
 /*
 Represents the reactive system's context, which is responsible for managing
@@ -66,6 +67,25 @@ pub fn (ctx &Context) untrack[T](fn_to_run fn () T) T {
 		ctx.effect_stack = old_stack.clone()
 		return result
 	}
+}
+
+pub fn (ctx &Context) create_element(
+	tag_name string,
+	children ?[]html.Element,
+	update   ?fn (mut target html.Element)
+) html.Element {
+	mut target := html.create_element(tag_name: tag_name)
+	if children != none {
+		for elem in children {
+			target.append_child(elem)
+		}
+	}
+	if update != none {
+		ctx.create_effect(fn [mut target, update]() {
+			update(mut target)
+		})
+	}
+	return target
 }
 
 /*
