@@ -4,19 +4,26 @@ import rx
 import html
 
 fn create_element(
+	ctx &rx.Context,
 	tag_name string,
-	children fn (mut target html.Element) []html.Element
+	children []html.Element,
+	update   ?fn (mut target html.Element)
 ) html.Element {
 	mut target := html.create_element(tag_name: tag_name)
-	for elem in children(mut target) {
+	for elem in children {
 		target.append_child(elem)
+	}
+	if update != none {
+		ctx.create_effect(fn [mut target, update]() {
+			update(mut target)
+		})
 	}
 	return target
 }
 
 // A simple counter component
 fn counter_component() html.Element {
-	mut ctx := rx.context()
+	ctx := rx.context()
 	mut count := ctx.signal(0)
 
 	do_increment := fn [mut count]() {
@@ -24,28 +31,28 @@ fn counter_component() html.Element {
 	}
 
 	return create_element(
+		ctx,
 		'div',
-		fn [ctx, count, do_increment] (mut _ html.Element) []html.Element {
-			return [
-				create_element(
-					'span',
-					fn [ctx, count] (mut target html.Element) []html.Element {
-						ctx.create_effect(fn [mut target, count] () {
-							target.set_inner_text('${count.get()}')
-						})
-						return []
-					}
-				)
-				create_element(
-					'button',
-					fn [do_increment] (mut target html.Element) []html.Element {
-						target.add_event_listener('click', do_increment)
-						target.set_inner_text('Increment')
-						return []
-					}
-				)
-			]
-		}
+		[
+			create_element(
+				ctx,
+				'span',
+				[],
+				fn [count] (mut target html.Element) {
+					target.set_inner_text('${count.get()}')
+				}
+			)
+			create_element(
+				ctx,
+				'button',
+				[],
+				fn [do_increment] (mut target html.Element) {
+					target.add_event_listener('click', do_increment)
+					target.set_inner_text('Increment')
+				}
+			)
+		],
+		none
 	)
 }
 
