@@ -69,15 +69,24 @@ pub fn (ctx &Context) untrack[T](fn_to_run fn () T) T {
 	}
 }
 
+type ChildrenParam = html.Element | []html.Element
 pub fn (ctx &Context) create_element(
 	tag_name string,
-	children ?[]html.Element,
+	children ?ChildrenParam,
 	update   ?fn (mut target html.Element)
 ) html.Element {
 	mut target := html.create_element(tag_name: tag_name)
 	if children != none {
-		for elem in children {
-			target.append_child(elem)
+		match children {
+			html.Element {
+				println('just one element')
+				target.append_child(children)
+			}
+			[]html.Element {
+				for elem in children {
+					target.append_child(elem)
+				}
+			}
 		}
 	}
 	if update != none {
