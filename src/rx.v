@@ -69,15 +69,24 @@ pub fn (ctx &Context) untrack[T](fn_to_run fn () T) T {
 	}
 }
 
-type ChildrenParam = html.Element | []html.Element
-pub fn (ctx &Context) create_element(
-	tag_name string,
-	children ?ChildrenParam,
+type ChildrenParam = string | html.Element | []html.Element
+pub struct CreateElementParams {
+pub:
+	tag_name string
+	children ?ChildrenParam
 	update   ?fn (mut target html.Element)
-) html.Element {
+}
+pub fn (ctx &Context) create_element(params CreateElementParams) html.Element {
+	tag_name := params.tag_name
+	children := params.children
+	update := params.update
+
 	mut target := html.create_element(tag_name: tag_name)
 	if children != none {
 		match children {
+			string {
+				target.set_inner_text(children)
+			}
 			html.Element {
 				println('just one element')
 				target.append_child(children)
@@ -89,11 +98,13 @@ pub fn (ctx &Context) create_element(
 			}
 		}
 	}
+
 	if update != none {
 		ctx.create_effect(fn [mut target, update]() {
 			update(mut target)
 		})
 	}
+
 	return target
 }
 

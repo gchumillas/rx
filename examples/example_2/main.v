@@ -5,8 +5,8 @@ import html
 
 // A simple counter component
 fn counter_component() html.Element {
-	ctx := rx.context()
-	mut count := ctx.signal(0)
+	ctx := rx.context() // create_context
+	mut count := ctx.signal(0) // create_signal
 
 	do_increment := fn [mut count]() {
 		count.set(count.get() + 1)
@@ -14,27 +14,25 @@ fn counter_component() html.Element {
 
 	// <div>
 	return ctx.create_element(
-		'div',
-		[
+		tag_name: 'div'
+		children: [
 			// <span>{count}</span>
 			ctx.create_element(
-				'span',
-				none,
-				fn [count] (mut target html.Element) {
+				tag_name: 'span'
+				update: fn [count] (mut target html.Element) {
 					target.set_inner_text('${count.get()}')
 				}
 			)
 			// <button onClick={do_increment}>Increment</button>
 			ctx.create_element(
-				'button',
-				none,
-				fn [do_increment] (mut target html.Element) {
+				tag_name: 'button'
+				children: 'Increment'
+				// TODO: this should be init, not update
+				update: fn [do_increment] (mut target html.Element) {
 					target.add_event_listener('click', do_increment)
-					target.set_inner_text('Increment')
 				}
 			)
 		],
-		none
 	)
 }
 
