@@ -1,7 +1,5 @@
 module rx
 
-import html
-
 /*
 Represents the reactive system's context, which is responsible for managing
 reactive effects and their dependencies. The `Context` structure maintains
@@ -67,45 +65,6 @@ pub fn (ctx &Context) untrack[T](fn_to_run fn () T) T {
 		ctx.effect_stack = old_stack.clone()
 		return result
 	}
-}
-
-type ChildrenParam = string | html.Element | []html.Element
-pub struct CreateElementParams {
-pub:
-	tag_name string
-	children ?ChildrenParam
-	update   ?fn (mut target html.Element)
-}
-pub fn (ctx &Context) create_element(params CreateElementParams) html.Element {
-	tag_name := params.tag_name
-	children := params.children
-	update := params.update
-
-	mut target := html.create_element(tag_name: tag_name)
-	if children != none {
-		match children {
-			string {
-				target.set_inner_text(children)
-			}
-			html.Element {
-				println('just one element')
-				target.append_child(children)
-			}
-			[]html.Element {
-				for elem in children {
-					target.append_child(elem)
-				}
-			}
-		}
-	}
-
-	if update != none {
-		ctx.create_effect(fn [mut target, update]() {
-			update(mut target)
-		})
-	}
-
-	return target
 }
 
 /*
