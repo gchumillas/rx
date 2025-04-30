@@ -18,7 +18,7 @@ mut:
 
 // Creates and initializes a new reactive context.
 // This is the entry point for creating a reactive system.
-pub fn context() &Context {
+pub fn create_context() &Context {
 	return &Context{
 		next_effect_id: 1
 	}
@@ -83,7 +83,7 @@ mut:
 
 // Creates a new signal with the given initial value.
 // A signal is a reactive value that can be observed and updated.
-pub fn (ctx &Context) signal[T](value T) &Signal[T] {
+pub fn (ctx &Context) create_signal[T](value T) &Signal[T] {
 	return &Signal[T]{
 		ctx:         ctx
 		value:       value
@@ -125,7 +125,7 @@ pub mut:
 
 // Creates a new reference wrapper for the given value.
 // This allows the value to be mutated within closures where direct mutation would not be possible.
-pub fn ref[T](value T) &Ref[T] {
+pub fn create_ref[T](value T) &Ref[T] {
 	return &Ref[T]{
 		value: value
 	}

@@ -8,10 +8,10 @@ fn benchmark_signal_operations() {
 
 	// Measure time to create signals
 	start := time.now()
-	ctx := context()
+	ctx := create_context()
 	mut signals := []Signal[int]{cap: 1000}
 	for i in 0 .. 1000 {
-		signals << ctx.signal(i)
+		signals << ctx.create_signal(i)
 	}
 	create_time := time.since(start)
 
@@ -41,12 +41,12 @@ fn benchmark_effect_operations() {
 
 	// Measure time to create effects with a single dependency
 	start := time.now()
-	ctx := context()
+	ctx := create_context()
 	mut signals := []Signal[int]{cap: 100}
 	mut counters := []int{len: 100, init: 0}
 
 	for i in 0 .. 100 {
-		signals << ctx.signal(i)
+		signals << ctx.create_signal(i)
 		idx := i // Capture for closure
 		ctx.create_effect(fn [mut signals, idx, mut counters] () {
 			counters[idx] = signals[idx].get()
@@ -75,8 +75,8 @@ fn benchmark_untrack_performance() {
 	println('Benchmarking untrack performance...')
 
 	// Setup signals and counters
-	ctx := context()
-	mut signal := ctx.signal(0)
+	ctx := create_context()
+	mut signal := ctx.create_signal(0)
 	mut tracked_counter := 0
 	mut untracked_counter := 0
 
@@ -110,8 +110,8 @@ fn benchmark_tracked_vs_untracked_large_operation() {
 	println('Benchmarking tracked vs untracked for large operations...')
 
 	// Setup
-	ctx := context()
-	mut count := ctx.signal(0)
+	ctx := create_context()
+	mut count := ctx.create_signal(0)
 	mut tracked_result := 0
 	mut untracked_result := 0
 	mut tracked_time := time.Duration(0)
