@@ -130,3 +130,7 @@ pub fn create_ref[T](value T) &Ref[T] {
 		value: value
 	}
 }
+
+pub fn on_cleanup(cb fn ()) {
+	// missing implementation
+}
