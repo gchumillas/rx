@@ -177,3 +177,27 @@ fn test_untrack_returns_value() {
 	})
 	assert result == 42
 }
+
+ 
+// Tests the cleanup mechanism of the reactive context.
+fn test_cleanup() {
+	ctx := create_context()
+	mut a := ctx.create_signal(0)
+	mut b := ctx.create_signal(0)
+	mut counter := create_ref(0)
+
+	ctx.create_effect(fn [ctx, a, b, mut counter] () {
+		a.get()
+		b.get()
+
+		// the callback is executed every time
+		// any signal included in this effect changes
+		ctx.on_cleanup(fn [mut counter] () {
+			counter.value++
+		})
+	})
+
+	a.set(1)
+	b.set(2)
+	assert counter.value == 2
+}
