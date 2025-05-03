@@ -12,16 +12,14 @@ effect for tracking purposes.
 @[heap]
 pub struct Context {
 mut:
-	effect_stack   []&Effect
-	next_effect_id int
+	next_id        int
+	current_effect ?&Effect
 }
 
 // Creates and initializes a new reactive context.
 // This is the entry point for creating a reactive system.
 pub fn create_context() &Context {
-	return &Context{
-		next_effect_id: 1
-	}
+	return &Context{}
 }
 
 /*
@@ -32,37 +30,41 @@ track their dependencies and re-run when those dependencies change.
 
 // Represents a reactive effect with its dependencies.
 struct Effect {
-	id  int
-	run fn () @[required]
+	id       int
+	callback fn () @[required]
+mut:
+	cleaners []fn ()
 }
 
 // Creates a reactive effect and tracks dependencies.
-pub fn (ctx &Context) create_effect(f fn ()) {
+pub fn (ctx &Context) create_effect(callback fn ()) {
 	unsafe {
-		id := ctx.next_effect_id
-		ctx.next_effect_id++
-
-		mut effect := Effect{
-			id:  id
-			run: f
+		ctx.current_effect = &Effect{
+			id: ctx.next_id
+			callback: callback
 		}
+		ctx.next_id++
+		callback()
+		ctx.current_effect = none
+	}
+}
 
-		ctx.effect_stack << &effect
-
-		// TODO: Clean up old subscriptions (if possible)
-		f()
-
-		ctx.effect_stack.delete(ctx.effect_stack.len - 1)
+pub fn (ctx &Context) on_cleanup(cleaner fn ()) {
+	unsafe {
+		current_effect := ctx.current_effect
+		if current_effect != none {
+			current_effect.cleaners << cleaner
+		}
 	}
 }
 
 // Run a function without tracking dependencies
-pub fn (ctx &Context) untrack[T](fn_to_run fn () T) T {
+pub fn (ctx &Context) untrack[T](callback fn () T) T {
 	unsafe {
-		old_stack := ctx.effect_stack.clone()
-		ctx.effect_stack.clear()
-		result := fn_to_run()
-		ctx.effect_stack = old_stack.clone()
+		current_effect := ctx.current_effect
+		ctx.current_effect = none
+		result := callback()
+		ctx.current_effect = current_effect
 		return result
 	}
 }
@@ -77,38 +79,40 @@ be observed and updated, enabling efficient state management and reactivity in a
 pub struct Signal[T] {
 	ctx &Context
 mut:
-	value       T
-	subscribers map[int]fn ()
+	value   T
+	effects map[int]&Effect
 }
 
 // Creates a new signal with the given initial value.
 // A signal is a reactive value that can be observed and updated.
 pub fn (ctx &Context) create_signal[T](value T) &Signal[T] {
 	return &Signal[T]{
-		ctx:         ctx
-		value:       value
-		subscribers: map[int]fn (){}
+		ctx:   ctx
+		value: value
 	}
 }
 
 // Retrieves the current value of the signal and registers any active effect as a subscriber.
 // This method can be called on an immutable signal, allowing for broader usage in reactive contexts.
 pub fn (s &Signal[T]) get() T {
-	if s.ctx.effect_stack.len > 0 {
-		mut current := s.ctx.effect_stack[s.ctx.effect_stack.len - 1]
-		unsafe {
-			s.subscribers[current.id] = current.run
+	unsafe {
+		current_effect := s.ctx.current_effect
+		if current_effect != none {
+			s.effects[current_effect.id] = current_effect
 		}
+		return s.value
 	}
-	return s.value
 }
 
 // Updates the signal's value and notifies all subscribers about the change.
 // This method supports being called on an immutable signal, enhancing flexibility in reactive programming.
 pub fn (mut s Signal[T]) set(value T) {
 	s.value = value
-	for _, sub in s.subscribers {
-		sub()
+	for _, effect in s.effects {
+		for cleaner in effect.cleaners {
+			cleaner()
+		}
+		effect.callback()
 	}
 }
 
@@ -129,8 +133,4 @@ pub fn create_ref[T](value T) &Ref[T] {
 	return &Ref[T]{
 		value: value
 	}
-}
-
-pub fn on_cleanup(cb fn ()) {
-	// missing implementation
 }
