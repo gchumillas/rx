@@ -13,7 +13,7 @@ effect for tracking purposes.
 pub struct Context {
 mut:
 	next_id        int
-	current_effect ?&Effect
+	current_effects []&Effect
 }
 
 // Creates and initializes a new reactive context.
@@ -39,21 +39,21 @@ mut:
 // Creates a reactive effect and tracks dependencies.
 pub fn (ctx &Context) create_effect(callback fn ()) {
 	unsafe {
-		ctx.current_effect = &Effect{
+		ctx.current_effects << &Effect{
 			id: ctx.next_id
 			callback: callback
 		}
 		ctx.next_id++
 		callback()
-		ctx.current_effect = none
+		ctx.current_effects.delete_last()
 	}
 }
 
 pub fn (ctx &Context) on_cleanup(cleaner fn ()) {
 	unsafe {
-		current_effect := ctx.current_effect
-		if current_effect != none {
-			current_effect.cleaners << cleaner
+		current_effects := ctx.current_effects
+		if current_effects.len > 0 {
+			current_effects[current_effects.len - 1].cleaners << cleaner
 		}
 	}
 }
@@ -61,10 +61,10 @@ pub fn (ctx &Context) on_cleanup(cleaner fn ()) {
 // Run a function without tracking dependencies
 pub fn (ctx &Context) untrack[T](callback fn () T) T {
 	unsafe {
-		current_effect := ctx.current_effect
-		ctx.current_effect = none
+		current_effects := ctx.current_effects.clone()
+		ctx.current_effects = []
 		result := callback()
-		ctx.current_effect = current_effect
+		ctx.current_effects = current_effects
 		return result
 	}
 }
@@ -96,9 +96,10 @@ pub fn (ctx &Context) create_signal[T](value T) &Signal[T] {
 // This method can be called on an immutable signal, allowing for broader usage in reactive contexts.
 pub fn (s &Signal[T]) get() T {
 	unsafe {
-		current_effect := s.ctx.current_effect
-		if current_effect != none {
-			s.effects[current_effect.id] = current_effect
+		current_effects := s.ctx.current_effects
+		if current_effects.len > 0 {
+			last_effect := current_effects.last()
+			s.effects[last_effect.id] = last_effect
 		}
 		return s.value
 	}
