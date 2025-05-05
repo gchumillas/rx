@@ -113,7 +113,8 @@ pub fn (mut s Signal[T]) set(value T) {
 		for cleaner in effect.cleaners {
 			cleaner()
 		}
-		effect.callback()
+		callback := effect.callback
+		callback()
 	}
 }
 
